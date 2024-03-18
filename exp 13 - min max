@@ -1,0 +1,101 @@
+import math
+
+PLAYER_X = 'X'
+PLAYER_O = 'O'
+EMPTY = ' '
+
+def is_winner(board, player):
+    win_positions = [
+        [board[0][0], board[0][1], board[0][2]],
+        [board[1][0], board[1][1], board[1][2]],
+        [board[2][0], board[2][1], board[2][2]],
+        [board[0][0], board[1][0], board[2][0]],
+        [board[0][1], board[1][1], board[2][1]],
+        [board[0][2], board[1][2], board[2][2]],
+        [board[0][0], board[1][1], board[2][2]],
+        [board[0][2], board[1][1], board[2][0]]
+    ]
+
+    return [player, player, player] in win_positions
+
+def game_over(board):
+    return is_winner(board, PLAYER_X) or is_winner(board, PLAYER_O) or any(EMPTY in row for row in board)
+
+def get_empty_positions(board):
+    return [(i, j) for i in range(3) for j in range(3) if board[i][j] == EMPTY]
+
+def minimax(board, depth, player):
+    if is_winner(board, PLAYER_X):
+        return -1
+    if is_winner(board, PLAYER_O):
+        return 1
+    if not any(EMPTY in row for row in board):
+        return 0
+
+    if player == PLAYER_O:
+        best_score = -math.inf
+        for i, j in get_empty_positions(board):
+            board[i][j] = PLAYER_O
+            score = minimax(board, depth+1, PLAYER_X)
+            board[i][j] = EMPTY
+            best_score = max(score, best_score)
+    else:
+        best_score = math.inf
+        for i, j in get_empty_positions(board):
+            board[i][j] = PLAYER_X
+            score = minimax(board, depth+1, PLAYER_O)
+            board[i][j] = EMPTY
+            best_score = min(score, best_score)
+
+    return best_score
+
+def find_best_move(board):
+    best_score = -math.inf
+    best_move = None
+
+    for i, j in get_empty_positions(board):
+        board[i][j] = PLAYER_O
+        score = minimax(board, 0, PLAYER_X)
+        board[i][j] = EMPTY
+
+        if score > best_score:
+            best_score = score
+            best_move = (i, j)
+
+    return best_move
+
+def print_board(board):
+    for row in board:
+        print(' | '.join(row))
+        print('---------')
+
+def play_game():
+    board = [[EMPTY, EMPTY, EMPTY],
+             [EMPTY, EMPTY, EMPTY],
+             [EMPTY, EMPTY, EMPTY]]
+
+    player = PLAYER_X
+
+    while not game_over(board):
+        print_board(board)
+        if player == PLAYER_X:
+            i, j = map(int, input('Player X enter row and column (e.g. 1 2): ').split())
+            if board[i-1][j-1] == EMPTY:
+                board[i-1][j-1] = PLAYER_X
+        else:
+            i, j = find_best_move(board)
+            board[i][j] = PLAYER_O
+
+        player = PLAYER_X if player == PLAYER_O else PLAYER_O
+
+    print_board(board)
+
+    if is_winner(board, PLAYER_X):
+        print('Player X wins!')
+    elif is_winner(board, PLAYER_O):
+        print('Player O wins!')
+    else:
+        print("It's a tie!")
+
+if __name__ == '__main__':
+    play_game()

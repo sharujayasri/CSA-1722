@@ -1,0 +1,33 @@
+import itertools
+
+def tsp_brute_force(graph, start):
+    n = len(graph)
+    all_cities = set(range(n))
+    all_cities.remove(start)
+    
+    min_cost = float('inf')
+    min_path = None
+    
+    for perm in itertools.permutations(all_cities):
+        path = [start] + list(perm) + [start]
+        cost = 0
+        for i in range(n):
+            cost += graph[path[i]][path[i+1]]
+        if cost < min_cost:
+            min_cost = cost
+            min_path = path
+    
+    return min_cost, min_path
+
+# Example usage
+graph = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+start = 0
+
+min_cost, min_path = tsp_brute_force(graph, start)
+print('Minimum cost:', min_cost)
+print('Optimal path:', min_path)
